@@ -41,8 +41,19 @@ void selectionsort(vector<int> &list) {
 int main() {
     // lista a ordenar
     vector<int>unlista = {15, 7, 9, 3, 12, 5, 2};
-    // funcion
-    selectionsort(unlista);
+    // funciones
+    cout<<"Eliga algoritmo de ordenamiento"<<endl;
+    int opt;
+    cin>>opt;
+    if (opt==1) {
+        bubbleSort(unlista);
+    }
+    else if (opt==2){
+        
+    }
+    else if (opt==3){
+        selectionsort(unlista);
+    }
     cout<<"Lista Ordenada: ";
     for (int num : unlista) {
         cout<< num<< " ";
