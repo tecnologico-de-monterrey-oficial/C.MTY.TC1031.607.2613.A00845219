@@ -25,11 +25,24 @@ void bubbleSort(vector<T> &list) {
     }
 }
 
+void selectionsort(vector<int> &list) {
+    int n = list.size();
+    for (int i=0; i<n-1; i++) {
+        int minIndex = i;
+        for (int j=i+1; j<n; j++) {
+            if (list[j] < list[minIndex]) {
+                minIndex = j;
+            }
+        }
+        swap(list[i], list[minIndex]);
+    }
+}
+
 int main() {
     // lista a ordenar
     vector<int>unlista = {15, 7, 9, 3, 12, 5, 2};
     // funcion
-    bubbleSort(unlista);
+    selectionsort(unlista);
     cout<<"Lista Ordenada: ";
     for (int num : unlista) {
         cout<< num<< " ";
