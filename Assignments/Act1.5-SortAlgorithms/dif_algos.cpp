@@ -27,9 +27,12 @@ void bubbleSort(vector<T> &list) {
 
 void selectionsort(vector<int> &list) {
     int n = list.size();
+    // recorremos la lista desde el inicio
     for (int i=0; i<n-1; i++) {
+        // valor minimo (menor) es i
         int minIndex = i;
         for (int j=i+1; j<n; j++) {
+            // comparamos el valor de j con el valor de minIndex para determinar si es menor
             if (list[j] < list[minIndex]) {
                 minIndex = j;
             }
