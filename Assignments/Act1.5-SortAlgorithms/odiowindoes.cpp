@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -25,7 +26,8 @@ void bubbleSort(vector<T> &list) {
     }
 }
 
-void selectionsort(vector<int> &list) {
+template <typename T>
+void selectionsort(vector<T> &list) {
     int n = list.size();
     // recorremos la lista desde el inicio
     for (int i=0; i<n-1; i++) {
@@ -41,21 +43,40 @@ void selectionsort(vector<int> &list) {
     }
 }
 
+template <typename T>
+void insertionsort(vector<T> &list) {
+    int n = list.size();
+    // recorremos la lista desde el inicio
+    for (int i=1; i<n; i++) {
+        int j = i-1;
+        // mientras j sea mayor o igual a 0 y el valor de j sea mayor que 0
+        while (j > 0 && list[j] < list[j - 1]) {
+            // movemos el valor de j a la izquierda
+            swap(list[j], list[j - 1]);
+            j--;
+        }
+        // colocamos key en su lugar correspondiente
+        list[j+1] = 0;
+    }
+}
+
 int main() {
     // lista a ordenar
     vector<int>unlista = {15, 7, 9, 3, 12, 5, 2};
     // funciones
-    cout<<"Eliga algoritmo de ordenamiento"<<endl;
+    cout<<"Eliga algoritmo de ordenamiento\n"<<endl;
+    cout<<"1 Bubble sort\n2 Selection sort\n3 Insertion sort"<<endl;
+    cout<<"Cualquier otra opcion arrojara error o la lista sin ordenar"<<endl;
     int opt;
     cin>>opt;
     if (opt==1) {
         bubbleSort(unlista);
     }
     else if (opt==2){
-        
+        selectionsort(unlista);
     }
     else if (opt==3){
-        selectionsort(unlista);
+        insertionsort(unlista);
     }
     cout<<"Lista Ordenada: ";
     for (int num : unlista) {
