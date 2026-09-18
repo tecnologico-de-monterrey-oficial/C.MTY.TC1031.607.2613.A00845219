@@ -1,0 +1,3 @@
+17/09/2026
+Se utilizo la IA para preguntar si mis codigos anteriores se pueden reutilizar haciendo ligeros cambios. 
+La IA igual me recomendo utilizar struct para tener todos los atributos publicos por default
