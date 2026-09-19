@@ -1,3 +1,10 @@
 17/09/2026
 Se utilizo la IA para preguntar si mis codigos anteriores se pueden reutilizar haciendo ligeros cambios. 
-La IA igual me recomendo utilizar struct para tener todos los atributos publicos por default
+La IA igual me recomendo utilizar struct para tener todos los atributos publicos por default.
+
+18/09/2026
+Hoy la IA me ayudo a implementar el como leer los archivos logs, le pedi informacion para saber
+que librerias usar y como se implementaban en el codigo para agilizar mi trabajo.
+Igual me fue ayudando a corregir errores mientras adaptaba mis algoritmos anteriores a este proyecto.
+Tener a la IA ayudandome a adaptar las variables para el codigo que estoy haciendo optimizo mucho mi
+tiempo. Algo que habia pensado que me tomaria un par de horas logre casi terminarlo dentro de una hora.
