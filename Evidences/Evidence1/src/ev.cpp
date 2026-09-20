@@ -275,8 +275,218 @@ void swapSort(vector<LogEntry> &list) {
     }
 }
 
+// Funcion para guardar datos en un archivo txt
+void guardarArchivo(string rutaArchivo, const vector<LogEntry>& registros) {
+    ofstream archivo(rutaArchivo);
+
+    if (!archivo.is_open()) {
+        cout << "Error: No se pudo abrir el archivo para guardar en " << rutaArchivo << endl;
+        return;
+    }
+
+    for (const auto& reg : registros) {
+        archivo << reg.texto << "\n";
+    }
+
+    archivo.close();
+    cout << "==> Archivo guardado con exito en: " << rutaArchivo << endl;
+}
+
+//funciones de busqueda binaria
+// limite inferior: busca el primer indice donde fecha >= target
+int buscarInicio(const vector<LogEntry>& arr, long long fechaInicio) {
+    int izq = 0;
+    int der = arr.size() - 1;
+    int resultado = -1;
+
+    while (izq <= der) {
+        int mid = izq + (der - izq) / 2;
+        
+        if (arr[mid].fecha >= fechaInicio) {    //mitad de la lista
+            resultado = mid;   // Inicio
+            der = mid - 1;     // buscamos a la izquierda para encontrar el primer indice
+        } else {
+            izq = mid + 1;
+        }
+    }
+    return resultado;
+}
+
+// limite superior: busca el ultimo indice donde fecha <= target
+int buscarFin(const vector<LogEntry>& arr, long long fechaFin) {
+    int izq = 0;
+    int der = arr.size() - 1;
+    int resultado = -1;
+
+    while (izq <= der) {
+        int mid = izq + (der - izq) / 2;
+        
+        if (arr[mid].fecha <= fechaFin) {   //mitad de la lista
+            resultado = mid;   // fin
+            izq = mid + 1;     // buscamos a la derecha para encontrar el ultimo índice
+        } else {
+            der = mid - 1;
+        }
+    }
+    return resultado;
+}
+
+// Funcion especifica para buscar y guardar registros en un rango de fechas
+void buscarYGuardarRango(const vector<LogEntry>& list) {
+    string mesInicio, mesFin, horaStrInicio, horaStrFin;
+    int diaInicio, diaFin;
+
+    cout << "\n=== BUSQUEDA POR RANGO DE FECHAS ===" << endl;
+    
+    //fecha inicial
+    cout << "FECHA INICIAL (Ejemplo: Jun 1 00:00:00): ";
+    cin >> mesInicio >> diaInicio >> horaStrInicio;
+    
+    // fecha final
+    cout << "FECHA FINAL (Ejemplo: Jun 1 23:59:59): ";
+    cin >> mesFin >> diaFin >> horaStrFin;
+
+    // Conversion de horas a enteros
+    int h1 = stoi(horaStrInicio.substr(0, 2)), m1 = stoi(horaStrInicio.substr(3, 2)), s1 = stoi(horaStrInicio.substr(6, 2));
+    int h2 = stoi(horaStrFin.substr(0, 2)),    m2 = stoi(horaStrFin.substr(3, 2)),    s2 = stoi(horaStrFin.substr(6, 2));
+
+    long long fechaInicio = convertirAFechaNumero(mesInicio, diaInicio, h1, m1, s1);
+    long long fechaFin    = convertirAFechaNumero(mesFin, diaFin, h2, m2, s2);
+
+    // busqueda binaria
+    int idxInicio = buscarInicio(list, fechaInicio);
+    int idxFin    = buscarFin(list, fechaFin);
+
+    // Validar si se encontraron registros en el rango
+    if (idxInicio != -1 && idxFin != -1 && idxInicio <= idxFin) {
+        int totalEncontrados = idxFin - idxInicio + 1;
+        cout << "\nSe encontraron " << totalEncontrados << " registros en ese rango." << endl;
+
+        // guardar en archivo txt
+        ofstream archivoRango("range607.txt");
+        if (archivoRango.is_open()) {
+            for (int i = idxInicio; i <= idxFin; i++) {
+                archivoRango << list[i].texto << "\n";
+            }
+            archivoRango.close();
+            cout << "==> Registros guardados con exito en 'range607.txt'" << endl;
+        }
+    } else {
+        cout << "\nNo se encontraron registros en el rango especificado." << endl;
+    }
+}
+
 /* FALTA
-archivo nuevo output.txt
-Rango por busqueda binaria
 Menu
 */
+int main() {
+    int opt;
+    do {
+        cout << "\nEliga una opcion del menu:\n";
+        cout << "1 Ordenar archivo de log\n";
+        cout << "2 Realizar busqueda por rango de fechas (range607.txt)\n";
+        cout << "3 Salir\n";
+        cout << "Opcion: ";
+        cin >> opt;
+
+        if (opt == 1) {
+            int archivoOpt, alg, prediccion;
+            
+            cout << "\nEliga el archivo de log:\n";
+            cout << "1. log607-1.txt (Desordenado)\n";
+            cout << "2. log607-2.txt (Casi ordenado)\n";
+            cout << "Opcion: ";
+            cin >> archivoOpt;
+
+            string nombreArchivo = (archivoOpt == 2) ? "log607-2.txt" : "log607-1.txt";
+            vector<LogEntry> registros = cargarArchivo(nombreArchivo);
+
+            if (registros.empty()) {
+                cout << "Error: No se pudo cargar el archivo.\n";
+                continue;
+            }
+
+            cout << "\nEliga algoritmo de ordenamiento:\n";
+            cout << "1 SwapSort\n2 SelectionSort\n3 BubbleSort\n4 InsertionSort\n5 MergeSort\n6 QuickSort\n7 ShellSort\n";
+            cout << "Opcion: ";
+            cin >> alg;
+
+            cout << "Prediccion de rendimiento (1: Rapido/Eficiente, 2: Lento/Ineficiente): ";
+            cin >> prediccion;
+
+            string nombreAlg = "";
+            string complejidad = "";
+            bool esRapido = false;
+
+            auto start = high_resolution_clock::now();
+
+            if (alg == 1) {
+                nombreAlg = "SwapSort";
+                complejidad = "O(N^2)";
+                swapSort(registros);
+            } else if (alg == 2) {
+                nombreAlg = "SelectionSort";
+                complejidad = "O(N^2)";
+                selectionsort(registros);
+            } else if (alg == 3) {
+                nombreAlg = "BubbleSort";
+                complejidad = "O(N^2)";
+                bubbleSort(registros);
+            } else if (alg == 4) {
+                nombreAlg = "InsertionSort";
+                complejidad = "O(N^2)";
+                insertionsort(registros);
+            } else if (alg == 5) {
+                nombreAlg = "MergeSort";
+                complejidad = "O(N log N)";
+                esRapido = true;
+                mergesort(registros, 0, registros.size() - 1);
+            } else if (alg == 6) {
+                nombreAlg = "QuickSort";
+                complejidad = "O(N log N)";
+                esRapido = true;
+                quicksort(registros, 0, registros.size() - 1);
+            }
+            
+            auto stop = high_resolution_clock::now();
+            auto duration = duration_cast<milliseconds>(stop - start);
+
+            // Guardar en output608.txt
+            guardarArchivo("output608.txt", registros);
+
+            // Imprimir reporte de la ejecución
+            cout << "\n--- RESULTADOS ---" << endl;
+            cout << "Archivo elegido: " << nombreArchivo << "\n";
+            cout << "Tamano de datos: " << registros.size() << " registros\n";
+            cout << "Algoritmo: " << nombreAlg << "\n";
+            cout << "Complejidad teorica: " << complejidad << "\n";
+            cout << "Tiempo de ejecucion: " << duration.count() << " ms\n";
+
+            // Evaluacion de la prediccion del usuario
+            bool acerto = (prediccion == 1 && esRapido) || (prediccion == 2 && !esRapido);
+            if (acerto) {
+                cout << "Prediccion del usuario: CORRECTA\n";
+            } else {
+                cout << "Prediccion del usuario: INCORRECTA\n";
+            }
+
+        } else if (opt == 2) {
+            int archivoOpt;
+            cout << "\nEliga el archivo para buscar por rango:\n";
+            cout << "1. log607-1.txt\n2. log607-2.txt\nOpcion: ";
+            cin >> archivoOpt;
+
+            string nombreArchivo = (archivoOpt == 2) ? "log607-2.txt" : "log607-1.txt";
+            vector<LogEntry> registros = cargarArchivo(nombreArchivo);
+
+            if (!registros.empty()) {
+                // Se ordenan los datos previamente para garantizar que la Búsqueda Binaria funcione
+                quicksort(registros, 0, registros.size() - 1);
+                buscarYGuardarRango(registros);
+            }
+        }
+
+    } while (opt != 3);
+
+    return 0;
+}

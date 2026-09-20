@@ -8,3 +8,7 @@ que librerias usar y como se implementaban en el codigo para agilizar mi trabajo
 Igual me fue ayudando a corregir errores mientras adaptaba mis algoritmos anteriores a este proyecto.
 Tener a la IA ayudandome a adaptar las variables para el codigo que estoy haciendo optimizo mucho mi
 tiempo. Algo que habia pensado que me tomaria un par de horas logre casi terminarlo dentro de una hora.
+
+19/09/2026
+Hoy me apoye mas que nada del codigo que ya tenia hecho, la IA otra vez solo me apoyo para verificar que lo estuviera adaptando
+correctamente. Es muy util ya que si me esta ayudando a ahorrar mucho tiempo.
