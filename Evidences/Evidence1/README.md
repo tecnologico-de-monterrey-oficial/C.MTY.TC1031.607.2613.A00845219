@@ -15,6 +15,7 @@ Hora en formato 24 horas -> HH:MM:SS
 
 # Uso de IA
 Durante este proyecto se utilizo la IA como herramienta de apoyo en los siguientes aspectos.
+    
     LO QUE SI SE PERMITIO
 Asistencia de debugging para entender errores, como por ejemplo errores complejos de memoria durante el QuickSort.
 Asistencia de adaptacion de codigo, la IA fue de gran ayuda para revisar errores durante la reutilizacion de codigo pasado, al tener el archivo abierto facilito e hizo mas rapido el proceso de este proyecto adaptando el codigo.
