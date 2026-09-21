@@ -72,10 +72,27 @@ long long convertirAFechaNumero(string mes, int dia, int hora, int min, int seg)
 // Funcion para cargar arhivo log y convertirlo en vector de LogEntry
 vector<LogEntry> cargarArchivo(string rutaArchivo) {
     vector<LogEntry> registros;
-    ifstream archivo(rutaArchivo);
+    ifstream archivo;
+
+    // Lista de posibles rutas segun desde donde ejecute tu VS Code
+    vector<string> posiblesRutas = {
+        rutaArchivo,               // 1. Desde Evidence1/
+        "../" + rutaArchivo,       // 2. Desde Evidence1/src/
+        "../../" + rutaArchivo    // 3. Desde Evidence1/src/output/
+    };
+
+    // Probar cada ruta hasta abrir
+    for (const string& ruta : posiblesRutas) {
+        archivo.open(ruta);
+        if (archivo.is_open()) {
+            cout << "==> Archivo abierto exitosamente en: " << ruta << endl;
+            break;
+        }
+        archivo.clear();
+    }
 
     if (!archivo.is_open()) {
-        cout << "Error: No se pudo abrir el archivo " << rutaArchivo << endl;
+        cout << "Error: No se pudo encontrar el archivo en ninguna ruta." << endl;
         return registros;
     }
 
@@ -84,18 +101,44 @@ vector<LogEntry> cargarArchivo(string rutaArchivo) {
         if (linea.empty()) continue; // Ignorar líneas vacías
 
         stringstream ss(linea);
-        string mes, horaStr;
+        string mes, palabraTemporal, horaStr;
         int dia;
 
-        // Formato tipico de log: "Month Day HH:MM:SS RestOfLine"
-        ss >> mes >> dia >> horaStr;
+        // Extraemos Mes, Día y la siguiente palabra
+        if (!(ss >> mes >> dia >> palabraTemporal)) continue;
 
-        // Extraer tiempos del string "HH:MM:SS"
-        int hora = stoi(horaStr.substr(0, 2));
-        int min  = stoi(horaStr.substr(3, 2));
-        int seg  = stoi(horaStr.substr(6, 2));
+        // Si no es un mes válido (por ejemplo, encabezados del txt), se ignora
+        if (mesANumero(mes) == 0) continue; 
 
-        // Crea la entrada de log
+        // Revisamos si la palabra que leímos tiene dos puntos ':'
+        if (palabraTemporal.find(':') == string::npos) {
+            // Si NO tiene ':', significa que nos cruzamos con el Año (ej. 2024)
+            // Entonces, la verdadera hora es la siguiente palabra:
+            ss >> horaStr; 
+        } else {
+            // Si SÍ tiene ':', entonces sí era la hora (el archivo no tenía año)
+            horaStr = palabraTemporal;
+        }
+
+        int hora = 0, min = 0, seg = 0;
+
+        // Extracción segura de la hora
+        try {
+            stringstream ssHora(horaStr);
+            string h, m, s;
+
+            if (getline(ssHora, h, ':') && getline(ssHora, m, ':') && getline(ssHora, s, ':')) {
+                hora = stoi(h);
+                min  = stoi(m);
+                seg  = stoi(s);
+            } else {
+                continue; // Formato de hora no válido, saltar línea
+            }
+        } catch (...) {
+            continue; // Si ocurre cualquier error, saltar línea corrupta
+        }
+
+        // Crear la entrada de log
         LogEntry entrada;
         entrada.texto = linea;
         entrada.fecha = convertirAFechaNumero(mes, dia, hora, min, seg);
@@ -104,7 +147,7 @@ vector<LogEntry> cargarArchivo(string rutaArchivo) {
     }
 
     archivo.close();
-    cout << "Archivo '" << rutaArchivo << "' cargado con exito. Total de registros: " << registros.size() << endl;
+    cout << "Total de registros cargados con exito: " << registros.size() << endl;
     return registros;
 }
 
@@ -262,18 +305,6 @@ void quicksort(vector<LogEntry> &list, int left, int right) {
     }
 }
 
-// swapSort
-void swapSort(vector<LogEntry> &list) {
-    int n = list.size();
-    // algoritmo, recorrer lista
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-            if (list[j].fecha > list[j + 1].fecha) {
-                swap(list[j], list[j + 1]);
-            }
-        }
-    }
-}
 
 // Funcion para guardar datos en un archivo txt
 void guardarArchivo(string rutaArchivo, const vector<LogEntry>& registros) {
@@ -398,7 +429,8 @@ int main() {
             cout << "Opcion: ";
             cin >> archivoOpt;
 
-            string nombreArchivo = (archivoOpt == 2) ? "log607-2.txt" : "log607-1.txt";
+            // Ruta corregida apunte a la carpeta data/
+            string nombreArchivo = (archivoOpt == 2) ? "data/log607-2.txt" : "data/log607-1.txt";
             vector<LogEntry> registros = cargarArchivo(nombreArchivo);
 
             if (registros.empty()) {
@@ -407,7 +439,7 @@ int main() {
             }
 
             cout << "\nEliga algoritmo de ordenamiento:\n";
-            cout << "1 SwapSort\n2 SelectionSort\n3 BubbleSort\n4 InsertionSort\n5 MergeSort\n6 QuickSort\n7 ShellSort\n";
+            cout << "1 SwapSort\n2 SelectionSort\n3 BubbleSort\n4 InsertionSort\n5 MergeSort\n6 QuickSort\n";
             cout << "Opcion: ";
             cin >> alg;
 
@@ -451,7 +483,7 @@ int main() {
             auto stop = high_resolution_clock::now();
             auto duration = duration_cast<milliseconds>(stop - start);
 
-            // Guardar en output608.txt
+            // Guardar resultado ordenado en output608.txt
             guardarArchivo("output608.txt", registros);
 
             // Imprimir reporte de la ejecución
@@ -462,7 +494,7 @@ int main() {
             cout << "Complejidad teorica: " << complejidad << "\n";
             cout << "Tiempo de ejecucion: " << duration.count() << " ms\n";
 
-            // Evaluacion de la prediccion del usuario
+            // Evaluación de la predicción del usuario
             bool acerto = (prediccion == 1 && esRapido) || (prediccion == 2 && !esRapido);
             if (acerto) {
                 cout << "Prediccion del usuario: CORRECTA\n";
@@ -476,7 +508,8 @@ int main() {
             cout << "1. log607-1.txt\n2. log607-2.txt\nOpcion: ";
             cin >> archivoOpt;
 
-            string nombreArchivo = (archivoOpt == 2) ? "log607-2.txt" : "log607-1.txt";
+            // Ruta corregida a la carpeta data/
+            string nombreArchivo = (archivoOpt == 2) ? "data/log607-2.txt" : "data/log607-1.txt";
             vector<LogEntry> registros = cargarArchivo(nombreArchivo);
 
             if (!registros.empty()) {
