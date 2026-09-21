@@ -12,3 +12,7 @@ tiempo. Algo que habia pensado que me tomaria un par de horas logre casi termina
 19/09/2026
 Hoy me apoye mas que nada del codigo que ya tenia hecho, la IA otra vez solo me apoyo para verificar que lo estuviera adaptando
 correctamente. Es muy util ya que si me esta ayudando a ahorrar mucho tiempo.
+
+20/09/2026
+Basicamente casi hago full vibecode la funcion de cargar archivo. Tenia muchos problemas al cargar el archivo desde otro
+directorio porque no sabia como hacerlo y el tiempo ya me estaba presionando.

@@ -74,7 +74,7 @@ vector<LogEntry> cargarArchivo(string rutaArchivo) {
     vector<LogEntry> registros;
     ifstream archivo;
 
-    // Lista de posibles rutas segun desde donde ejecute tu VS Code
+    // Listas de posibles rutas para abrir el archivo
     vector<string> posiblesRutas = {
         rutaArchivo,               // 1. Desde Evidence1/
         "../" + rutaArchivo,       // 2. Desde Evidence1/src/
@@ -110,19 +110,19 @@ vector<LogEntry> cargarArchivo(string rutaArchivo) {
         // Si no es un mes válido (por ejemplo, encabezados del txt), se ignora
         if (mesANumero(mes) == 0) continue; 
 
-        // Revisamos si la palabra que leímos tiene dos puntos ':'
+        // Revisar si la palabra temporal contiene ':', lo que indica que es la hora
         if (palabraTemporal.find(':') == string::npos) {
             // Si NO tiene ':', significa que nos cruzamos con el Año (ej. 2024)
             // Entonces, la verdadera hora es la siguiente palabra:
             ss >> horaStr; 
         } else {
-            // Si SÍ tiene ':', entonces sí era la hora (el archivo no tenía año)
+            // Si tiene ':', entonces sí era la hora
             horaStr = palabraTemporal;
         }
 
         int hora = 0, min = 0, seg = 0;
 
-        // Extracción segura de la hora
+        // Extraccion de la hora
         try {
             stringstream ssHora(horaStr);
             string h, m, s;
@@ -132,7 +132,7 @@ vector<LogEntry> cargarArchivo(string rutaArchivo) {
                 min  = stoi(m);
                 seg  = stoi(s);
             } else {
-                continue; // Formato de hora no válido, saltar línea
+                continue; // Formato de hora no valido, saltar línea
             }
         } catch (...) {
             continue; // Si ocurre cualquier error, saltar línea corrupta
@@ -429,7 +429,12 @@ int main() {
             cout << "Opcion: ";
             cin >> archivoOpt;
 
-            // Ruta corregida apunte a la carpeta data/
+            if (archivoOpt != 1 && archivoOpt != 2) {
+                cout << "Error: Opcion de archivo invalida. Intente de nuevo.\n";
+                continue; 
+            }
+
+            // Ruta para ir a data/
             string nombreArchivo = (archivoOpt == 2) ? "data/log607-2.txt" : "data/log607-1.txt";
             vector<LogEntry> registros = cargarArchivo(nombreArchivo);
 
@@ -508,12 +513,17 @@ int main() {
             cout << "1. log607-1.txt\n2. log607-2.txt\nOpcion: ";
             cin >> archivoOpt;
 
-            // Ruta corregida a la carpeta data/
+            if (archivoOpt != 1 && archivoOpt != 2) {
+            cout << "Error: Opcion de archivo invalida. Intente de nuevo.\n";
+            continue; 
+            }
+
+            // Ruta a la carpeta data/
             string nombreArchivo = (archivoOpt == 2) ? "data/log607-2.txt" : "data/log607-1.txt";
             vector<LogEntry> registros = cargarArchivo(nombreArchivo);
 
             if (!registros.empty()) {
-                // Se ordenan los datos previamente para garantizar que la Búsqueda Binaria funcione
+                // Se ordena el vector antes de realizar la búsqueda por rango
                 quicksort(registros, 0, registros.size() - 1);
                 buscarYGuardarRango(registros);
             }
