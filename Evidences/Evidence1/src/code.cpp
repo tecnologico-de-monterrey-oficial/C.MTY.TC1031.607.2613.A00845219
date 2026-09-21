@@ -19,7 +19,6 @@ ej. rapido, lento, estable, etc.)
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include <random>
 #include <string>
 #include <algorithm>
 #include <fstream> // Para leer archivos
