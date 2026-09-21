@@ -24,7 +24,7 @@ ej. rapido, lento, estable, etc.)
 #include <fstream> // Para leer archivos
 #include <sstream> // Para convertir strings a números
 
-using namespace std;
+using namespace std;    // para no tener que escribir std:: antes de cosas como cout, vector, cin, string, etc.
 using namespace std::chrono;
 
 // Lo mismo que class pero todo publico por default
