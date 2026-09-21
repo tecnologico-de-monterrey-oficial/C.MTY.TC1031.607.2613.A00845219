@@ -305,6 +305,21 @@ void quicksort(vector<LogEntry> &list, int left, int right) {
     }
 }
 
+// shellSort
+void shellSort(vector<LogEntry> &list) {
+    int n = list.size();
+     // reducir los saltos a la mitad en cada iteracion
+    for (int gap = n / 2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i++) {
+            LogEntry temp = list[i];
+            int j;
+            for (j = i; j >= gap && list[j - gap].fecha > temp.fecha; j -= gap) {
+                list[j] = list[j - gap];
+            }
+            list[j] = temp;
+        }
+    }
+}
 
 // Funcion para guardar datos en un archivo txt
 void guardarArchivo(string rutaArchivo, const vector<LogEntry>& registros) {
@@ -407,9 +422,7 @@ void buscarYGuardarRango(const vector<LogEntry>& list) {
     }
 }
 
-/* FALTA
-Menu
-*/
+
 int main() {
     int opt;
     do {
@@ -444,7 +457,7 @@ int main() {
             }
 
             cout << "\nEliga algoritmo de ordenamiento:\n";
-            cout << "1 SwapSort\n2 SelectionSort\n3 BubbleSort\n4 InsertionSort\n5 MergeSort\n6 QuickSort\n";
+            cout << "1 SwapSort\n2 SelectionSort\n3 BubbleSort\n4 InsertionSort\n5 MergeSort\n6 QuickSort\n7 ShellSort\n";
             cout << "Opcion: ";
             cin >> alg;
 
@@ -483,6 +496,15 @@ int main() {
                 complejidad = "O(N log N)";
                 esRapido = true;
                 quicksort(registros, 0, registros.size() - 1);
+            }
+            else if (alg == 7) {
+                nombreAlg = "ShellSort";
+                complejidad = "O(N log N)";
+                esRapido = true;
+                shellSort(registros);
+            } else {
+                cout << "Error: Opcion de algoritmo invalida. Intente de nuevo.\n";
+                continue; 
             }
             
             auto stop = high_resolution_clock::now();
