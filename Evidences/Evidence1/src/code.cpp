@@ -34,12 +34,14 @@ int mesANumero(string mes) {
 }
 
 // long sirve para guardar numeros grandes que int no puede guardar
-long long convertirAFechaNumero(string mes, int dia, int hora, int min, int seg) {
+long long convertirAFechaNumero(int year, string mes, int dia, int hora, int min, int seg) {
     int numMes = mesANumero(mes);
-    
+
+    //AQUI SE ME OLVIDO PONER LA VARIBALE DEL AÑO ^^^
+
     // fecha en orden de importancia con matematicas para hacer comparaciones
     // Año * 10000000000 + Mes * 100000000 + Dia * 1000000 + Hora * 10000 + Minuto * 100 + Segundo
-    long long fechaCompuesta = 2024LL * 10000000000LL + 
+    long long fechaCompuesta = (long long)year * 10000000000LL + 
                                 numMes * 100000000LL + 
                                 dia * 1000000LL + 
                                 hora * 10000LL + 
@@ -83,10 +85,10 @@ vector<LogEntry> cargarArchivo(string rutaArchivo) {
 
         stringstream ss(linea);
         string mes, palabraTemporal, horaStr;
-        int dia;
+        int dia, year;  // Se agrego el año
 
         // Extraemos Mes, Día y la siguiente palabra
-        if (!(ss >> mes >> dia >> palabraTemporal)) continue;
+        if (!(ss >> mes >> dia >> year >> palabraTemporal)) continue;
 
         // Si no es un mes válido (por ejemplo, encabezados del txt), se ignora
         if (mesANumero(mes) == 0) continue; 
@@ -122,7 +124,7 @@ vector<LogEntry> cargarArchivo(string rutaArchivo) {
         // Crear la entrada de log
         LogEntry entrada;
         entrada.texto = linea;
-        entrada.fecha = convertirAFechaNumero(mes, dia, hora, min, seg);
+        entrada.fecha = convertirAFechaNumero(year, mes, dia, hora, min, seg);
 
         registros.push_back(entrada);
     }
@@ -361,24 +363,25 @@ int buscarFin(const vector<LogEntry>& arr, long long fechaFin) {
 // Funcion especifica para buscar y guardar registros en un rango de fechas
 void buscarYGuardarRango(const vector<LogEntry>& list) {
     string mesInicio, mesFin, horaStrInicio, horaStrFin;
-    int diaInicio, diaFin;
+    int diaInicio, diaFin, yearIni, yearFin; // se agrego yearIni y yearFin
 
     cout << "\n=== BUSQUEDA POR RANGO DE FECHAS ===" << endl;
     
     //fecha inicial
-    cout << "FECHA INICIAL (Ejemplo: Jun 1 00:00:00): ";
-    cin >> mesInicio >> diaInicio >> horaStrInicio;
+    cout << "FECHA INICIAL (Ejemplo: Jun 1 2024 00:00:00): ";
+    cin >> mesInicio >> diaInicio >> yearIni >> horaStrInicio; // adaptando yearIni
     
     // fecha final
-    cout << "FECHA FINAL (Ejemplo: Jun 1 23:59:59): ";
-    cin >> mesFin >> diaFin >> horaStrFin;
+    cout << "FECHA FINAL (Ejemplo: Jun 1 2024 23:59:59): ";
+    cin >> mesFin >> diaFin >> yearFin >> horaStrFin;   // adaptando yearFin
 
     // Conversion de horas a enteros
     int h1 = stoi(horaStrInicio.substr(0, 2)), m1 = stoi(horaStrInicio.substr(3, 2)), s1 = stoi(horaStrInicio.substr(6, 2));
     int h2 = stoi(horaStrFin.substr(0, 2)),    m2 = stoi(horaStrFin.substr(3, 2)),    s2 = stoi(horaStrFin.substr(6, 2));
 
-    long long fechaInicio = convertirAFechaNumero(mesInicio, diaInicio, h1, m1, s1);
-    long long fechaFin    = convertirAFechaNumero(mesFin, diaFin, h2, m2, s2);
+    // se agrego yearIni y yearFin para la busqueda binaria
+    long long fechaInicio = convertirAFechaNumero(yearIni, mesInicio, diaInicio, h1, m1, s1);
+    long long fechaFin    = convertirAFechaNumero(yearFin, mesFin, diaFin, h2, m2, s2);
 
     // busqueda binaria
     int idxInicio = buscarInicio(list, fechaInicio);
