@@ -58,7 +58,9 @@ public:
             }
         }
         else {
-            
+            // apuntar a un nuevo nodo
+            front = new Node<T>(valor);
+            rear = front;
         }
     }
 };
