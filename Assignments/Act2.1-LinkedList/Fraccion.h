@@ -1,6 +1,7 @@
 #ifndef Fraction_h
 #define Fraction_h
 #include <iostream>
+
 // define una clase fracción básica
 class Fraction {
 private:
@@ -28,7 +29,16 @@ public:
 
     void print() const {
         std::cout << numerator << "/" << denominator << std::endl;
-    }    
+    }
+
+    bool operator==(const Fraction& other) const {
+        return numerator == other.numerator && denominator == other.denominator;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Fraction& f) {
+        os << f.numerator << "/" << f.denominator;
+        return os;
+    }
 };
 
 #endif
