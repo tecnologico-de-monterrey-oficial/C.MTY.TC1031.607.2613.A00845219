@@ -123,7 +123,7 @@ int main() {
     cout << "\n============================================\n";
     cout << "Bienvenido. De que tipo de datos deseas crear la lista?\n";
     cout << "1. Lista de Enteros (int)\n";
-    cout << "2. Lista de Fracciones (Fraction)\n";
+    cout << "2. Lista de Fracciones (Fraccion)\n";
     cout << "Elige una opcion: ";
     int tipo; cin >> tipo;
 
