@@ -105,6 +105,13 @@ int main() {
         cout << "Seleccione una opcion: ";
         cin >> opcion;
 
+        //valirdar que opcion sea un numero
+        if (cin.fail()) {
+            cin.clear(); // limpia el estado de error de cin
+            cin.ignore(10000, '\n'); // limpiar buffer
+            cout << ">> Entrada invalida. Por favor, ingrese un numero del 1 al 5.\n";
+            continue;
+        }
         // cliente nuevo se forma en la fila
         if (opcion == 1) {
             Cliente newClient;
