@@ -105,6 +105,7 @@ int main() {
         cout << "Seleccione una opcion: ";
         cin >> opcion;
 
+        // cliente nuevo se forma en la fila
         if (opcion == 1) {
             Cliente newClient;
             cout << "Ingrese el nombre del cliente: ";
@@ -116,6 +117,7 @@ int main() {
             fila.push(newClient);
             cout << ">> " << newClient.nombre << " se ha formado en la fila\n";
         } 
+        // atender al siguiente cliente formado
         else if (opcion == 2) {
             try {
                 Cliente clienteAtendido = fila.pop();
@@ -132,6 +134,7 @@ int main() {
                 cout << ">> " << e.what() << "\n";
             }
         } 
+        // ver al siguiente cliente en la fila sin atenderlo aun
         else if (opcion == 3) {
             try {
                 Cliente siguiente = fila.front();
@@ -141,6 +144,7 @@ int main() {
                 cout << ">> " << e.what() << "\n";
             }
         } 
+        // mostrar cuantas personas quedan en la fila por atender
         else if (opcion == 4) {
             cout << ">> Personas esperando en la fila: " << fila.getSize() << "\n";
         } 
