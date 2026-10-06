@@ -1,1 +1,2 @@
-Por accidente borre el directorio principal este tecnicamente es uno nuevo, no restaure el anterior
+Por accidente borre el directorio principal este tecnicamente es uno nuevo
+Es que me confundi de directorio pense estaba llendo en orden
