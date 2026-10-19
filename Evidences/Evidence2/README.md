@@ -24,4 +24,4 @@ Generacion de codigo desde cero, ni que resolviera el proyecto, y tampoco que cr
 Aceptacion ciega de implementaciones, el codigo que se llego a cambiar o generar automaticamente esta revisado para ver si es eficiente o si de verdad es correcto lo que la IA propuso. Un ejemplo fue que me di cuenta que 2 de mis archivos headers eran muy complicados de implementar por su estructura, tuve que hacer cambios como quitar el propio node que tenian ellos, y cambiar algunas lineas de codigo dentro de ellos mismos. Esto le pedi a la IA que me diera la solucion y leia detenidamente la razon del porque, los cambios son minusculos y se mantuvo la estructura original del codigo.
 
 # Video explicativo
-Link: 
+Link: https://youtu.be/VcO2HjEDCaM
