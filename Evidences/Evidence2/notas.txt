@@ -1,7 +1,0 @@
-En las instrucciones dice que tiene que ser logs608.txt pero solo hay logs607.txt
-
-Se me olvido hacer el push el viernes porque termine muy cansado.
-
-Hoy sabado termine muy tarde mañana reviso el codigo. Use IA para generar la parte de leer archivos y revisar errores de codigo. Igual me dio unas ideas que al final si implemente, como ejemplo en DLinkedList.h me recomendo crear 2 nuevos metodos publicos a la clase para facilitar la implementacion al codigo principal.
-
-Domingo arreglar errores, perfeccionar y documentos.

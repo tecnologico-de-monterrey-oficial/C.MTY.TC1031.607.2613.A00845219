@@ -198,7 +198,7 @@ void buscarPorDia(const vector<LogRecord>& registros, bool ordenado) {
     string mesBuscado;
     int diaBuscado, yearBuscado;
     
-    cout << "\n-- Búsqueda de Registros --\n";
+    cout << "\n-- Busqueda de Registros --\n";
     cout << "Mes (Ej. Sep): "; cin >> mesBuscado;
     cout << "Dia (Ej. 14): "; cin >> diaBuscado;
     cout << "Anio (Ej. 2024): "; cin >> yearBuscado;
@@ -313,7 +313,7 @@ int main() {
                 cout << "Tiempo de ejecucion: " << duration.count() << " ms\n";
                 cout << "Numero de comparaciones: " << comparaciones << "\n";
                 cout << "Profundidad maxima de recursion: " << maxProfundidad << "\n";
-                cout << "Coincidencia con la prediccion: (Complejidad: O(N log N)\n";
+                cout << "Prediccion de complejidad: log607-1.txt = O(N log N), log607-2.txt = O(N^2)\n";
                 cout << "--------------------------------\n";
             }
             archivoOutput(arrayTemporalLogs);
