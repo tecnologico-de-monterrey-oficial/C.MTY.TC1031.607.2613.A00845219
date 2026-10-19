@@ -33,7 +33,7 @@ public:
     // push hace que el nodo se agregue al tope del stack
     void push(T value) {
         Node<T>* newNode = new Node<T>(value);
-        newNode->next = topNode;
+        newNode->next.reset(topNode); // cambio 
         topNode = newNode;
         count++;
     }
@@ -45,7 +45,7 @@ public:
         }
         Node<T>* temp = topNode;
         T poppedValue = temp->data;
-        topNode = topNode->next;
+        topNode = temp->next.release(); // cambio
         delete temp;
         count--;
         return poppedValue;

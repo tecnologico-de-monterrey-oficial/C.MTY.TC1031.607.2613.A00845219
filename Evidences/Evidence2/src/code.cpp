@@ -1,33 +1,3 @@
-/* NO PUEDES USAR LIBRERIAS:
-std::list, std::forward_list, std::queue, std::stack, std::deque ni std::sort std::stable_sort. 
-Los registros se almacenan únicamente en tu lista doblemente ligada. 
-
-USAR SOLO PARA CONTAR FRECUENCIAS ESTADISTICAS:
-std::map y std::unordered_map
-
-===Por hacer===
-1. Aplicar
-- LinkedList (lista simple)
-- Queue (fila)
-- Stack (pila)
-- DoublyLinkedList (lista doblemente ligada)
-
-2. Buscar la funcion para cargar documentos al programa
-3. Menu
-- Buscar logs por dia
-- Ordenar por fecha y hora
-- Logs ascendente y descendentes
-- Estadisticas de logs (total de registros, dia con mas actividad, IP mas repetida)
-- Salir limpiando memoria
-
-===Opcionales posibles===
-1. Implementar un algoritmo de ordenamiento (merge o quick)
-2. Agregar una fila de consultas e ir atendiendo una por una en orden de fila
-
-INCLUIR OUTPUT
->>> detalles en canvas
-*/
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -37,14 +7,16 @@ INCLUIR OUTPUT
 #include <map>
 #include <set>
 #include <algorithm>
+#include <chrono>
 
 // Archivos pasados
-#include "LinkedListMain.h"
-#include "DLinkedList.h"
-#include "Q.h"
-#include "pilas.h"
+#include "../include/LinkedListMain.h"
+#include "../include/DLinkedList.h"
+#include "../include/Q.h"
+#include "../include/pilas.h"
 
 using namespace std;
+using namespace std::chrono;
 
 // Struct para almacenar cada registro de log
 struct LogRecord {
@@ -73,12 +45,10 @@ struct LogRecord {
     }
     // Sobrecarga de operadores (Solo ordena por año, luego mes, luego día)
     bool operator<(const LogRecord& other) const {
-        if (year != other.year) {
-            return year < other.year;
-        }
-        
-        int m1 = mesANumero();
-        int m2 = other.mesANumero();
+        if (year != other.year) return year < other.year;
+
+        int m1 = mesANumero(mes);
+        int m2 = other.mesANumero(other.mes);
         if (m1 != m2) return m1 < m2;
         
         return dia < other.dia;
@@ -89,7 +59,7 @@ struct LogRecord {
     }
     
     bool operator==(const LogRecord& other) const {
-        // Corregido: anio -> year
+        // Comparar año, mes y día para determinar igualdad
         return year == other.year && dia == other.dia && mes == other.mes; 
     }
 };
@@ -101,131 +71,265 @@ void imprimirLog(const LogRecord& log) {
 }
 
 // Funcion para cargar archivo log y convertirlo en DLinkedList
-void cargarArchivo(DoublyLinkedList<LogRecord>& listaLogs) {
-    Queue<string> filaLineas;
-    string nombreArchivo;
+void cargarArchivo(vector<LogRecord>& arrayLogs, string rutaArchivo, string& rutaExitosa) {
     int lineasOmitidas = 0, registrosCargados = 0;
-    cout << "Ingresa el nombre del archivo a cargar (ej. log607-1.txt): ";
-    cin >> nombreArchivo;
-    ifstream archivo(nombreArchivo);
+    vector<string> posiblesRutas = {
+        rutaArchivo,               // 1. Desde Evidence2/
+        "../" + rutaArchivo,       // 2. Desde Evidence2/src/
+        "../../" + rutaArchivo     // 3. Desde Evidence2/src/output/
+    };
+
+    ifstream archivo;
+    for (const string& ruta : posiblesRutas) {
+        archivo.open(ruta);
+        if (archivo.is_open()) {
+            rutaExitosa = ruta; // Se usa 'rutaExitosa' que viene por parámetro
+            cout << "==> Archivo abierto exitosamente en: " << ruta << endl;
+            break;
+        }
+        archivo.clear();
+    }
 
     if (!archivo.is_open()) {
         cout << "Error: No se pudo abrir el archivo." << endl;
         return;
     }
+
     string linea;
-
+    arrayLogs.clear();
     while (getline(archivo, linea)) {
-        if (!linea.empty()) {
-            filaLineas.push(linea); 
-        }
-    }
-    archivo.close();
+        if (linea.empty()) continue;
 
-    while (!filaLineas.isEmpty()) {
-        string currentLine = filaLineas.pop();
-        stringstream ss(currentLine);
+        stringstream ss(linea);
         LogRecord log;
         
         if (ss >> log.mes >> log.dia >> log.year >> log.hora >> log.ip) {
             getline(ss >> ws, log.mensaje);
-            listaLogs.addLast(log); 
+            arrayLogs.push_back(log); // Se usa 'arrayLogs' en lugar de 'listaLogs'
             registrosCargados++;
         } else {
             lineasOmitidas++;
-            cout << "Línea omitida por formato inválido: " << currentLine << endl;
         }
     }
+    archivo.close();
 
     cout << "Carga finalizada. Registros exitosos: " << registrosCargados 
-         << " | Líneas omitidas: " << lineasOmitidas << endl;
+         << " | Lineas omitidas: " << lineasOmitidas << endl;
 }
 
 // QuickSort
-int getPivot(vector<LogRecord> &list, int left, int right) {
+int getPivot(vector<LogRecord> &list, int left, int right, long long &comparaciones) {
     int aux = left - 1;
     int pivot = right;
-    // iteramos desde left hasta pivot
     for (int i = left; i < pivot; i++) {
-        // Tenemos < sobrecargado en LogRecord, usar directo
+        comparaciones++;
         if (list[i] < list[pivot]) {
             aux++;
             swap(list[aux], list[i]);
         }
     }
     aux++;
-    // intercambiamos el valor de aux con el valor de pivot
     swap(list[aux], list[pivot]);
     return aux;
 }
 
-void quicksort(vector<LogRecord> &arr, int inicio, int fin) {
-    // ejecucion recursiva
+void quicksort(vector<LogRecord> &arr, int inicio, int fin, long long &comparaciones, int profundidadActual, int &maxProfundidad) {
+    if (profundidadActual > maxProfundidad) {
+        maxProfundidad = profundidadActual;
+    }
     if (inicio < fin) {
-        int pivot = getPivot(arr, inicio, fin);
-        quicksort(arr, inicio, pivot - 1);
-        quicksort(arr, pivot + 1, fin);
+        int pivot = getPivot(arr, inicio, fin, comparaciones);
+        quicksort(arr, inicio, pivot - 1, comparaciones, profundidadActual + 1, maxProfundidad);
+        quicksort(arr, pivot + 1, fin, comparaciones, profundidadActual + 1, maxProfundidad);
     }
 }
 
 // Funcion para escribir estadisticas del log
 void Estadisticas(const vector<LogRecord>& registros) {
+    if (registros.empty()) {
+        cout << "No hay registros cargados.\n";
+        return;
+    }
+    // map para contar el dia con actividad, ip repetida y evento mas frecuente
     map<string, int> conteoDias;
     map<string, int> conteoIps;
-    set<string> tiposEvento;
-    
+    map<string, int> conteoEventos;
+    // contar frecuencias
     for (const auto& r : registros) {
         string fechaStr = r.mes + " " + to_string(r.dia) + " " + to_string(r.year);
         conteoDias[fechaStr]++;
         conteoIps[r.ip]++;
-        tiposEvento.insert(r.mensaje);
+        conteoEventos[r.mensaje]++;
     }
+    // Encontrar los maximos y empates
+    int maxDias = 0, maxIps = 0, maxEventos = 0;
     
-    string diaMasIncidentes, ipMasRepetida;
-    int maxDias = 0, maxIps = 0;
+    for (const auto& par : conteoDias) if (par.second > maxDias) maxDias = par.second;
+    for (const auto& par : conteoIps) if (par.second > maxIps) maxIps = par.second;
+    for (const auto& par : conteoEventos) if (par.second > maxEventos) maxEventos = par.second;
     
-    for (const auto& par : conteoDias) {
-        if (par.second > maxDias) { maxDias = par.second; diaMasIncidentes = par.first; }
-    }
-    for (const auto& par : conteoIps) {
-        if (par.second > maxIps) { maxIps = par.second; ipMasRepetida = par.first; }
-    }
+    // Almacenar todos los que empaten con el valor maximo
+    vector<string> diasEmpate, ipsEmpate, eventosEmpate;
+    for (const auto& par : conteoDias) if (par.second == maxDias) diasEmpate.push_back(par.first);
+    for (const auto& par : conteoIps) if (par.second == maxIps) ipsEmpate.push_back(par.first);
+    for (const auto& par : conteoEventos) if (par.second == maxEventos) eventosEmpate.push_back(par.first);
     
     cout << "\n================ ESTADISTICAS DEL REPORTE ================\n";
-    cout << "Total de registros: " << registros.size() << "\n";
-    cout << "Dia con mas incidentes: " << diaMasIncidentes << " (" << maxDias << " eventos)\n";
-    cout << "IP mas repetida: " << ipMasRepetida << " (" << maxIps << " apariciones)\n";
-    cout << "Tipos de evento detectados:\n";
-    for (const auto& ev : tiposEvento) {
-        cout << " - " << ev << "\n";
-    }
+    cout << "Total de registros procesados: " << registros.size() << "\n\n";
+    cout << "Dia con mas incidentes (" << maxDias << " eventos):\n";
+
+    for(const auto& dia : diasEmpate) cout << " -> " << dia << "\n";
+    cout << "\nIPs mas repetidas (" << maxIps << " apariciones):\n";
+
+    for(const auto& ip : ipsEmpate) cout << " -> " << ip << "\n";
+    cout << "\nEvento mas frecuente (" << maxEventos << " incidencias):\n";
+    
+    for(const auto& evento : eventosEmpate) cout << " -> " << evento << "\n";
     cout << "==========================================================\n";
 }
 
-// --- MAIN PRINCIPAL ---
+// funcion para usar la pila y buscar por dia
+void buscarPorDia(const vector<LogRecord>& registros, bool ordenado) {
+    if (!ordenado) {
+        cout << "\nALERTA: La lista no esta ordenada. Por favor ordene los datos primero (Opcion 1).\n";
+        return;
+    }
+    
+    string mesBuscado;
+    int diaBuscado, yearBuscado;
+    
+    cout << "\n-- Búsqueda de Registros --\n";
+    cout << "Mes (Ej. Sep): "; cin >> mesBuscado;
+    cout << "Dia (Ej. 14): "; cin >> diaBuscado;
+    cout << "Anio (Ej. 2024): "; cin >> yearBuscado;
+
+    LogRecord temp;
+    if (temp.mesANumero(mesBuscado) == 0 || diaBuscado < 1 || diaBuscado > 31 || yearBuscado < 1900) {
+        cout << "Error: Formato de fecha invalido.\n";
+        return;
+    }
+    // 
+    LogRecord objetivo;
+    objetivo.mes = mesBuscado; objetivo.dia = diaBuscado; objetivo.year = yearBuscado;
+    
+    // usando la pila
+    Stack<LogRecord> pilaResultados; 
+    int contador = 0;
+
+    // O(N)
+    for (const auto& r : registros) {
+        if (r == objetivo) {
+            pilaResultados.push(r); // Insertar en tu pila personalizada
+            contador++;
+        } else if (objetivo < r) {
+            break; // Detener recorrido gracias al ordenamiento previo
+        }
+    }
+
+    if (contador == 0) {
+        cout << "\nNo hay registros para la fecha solicitada.\n";
+    } else {
+        cout << "\nSe encontraron " << contador << " registros.\n";
+        cout << "Mostrando orden invertido usando Pila:\n";
+        
+        // iterar la pila hasta terminar
+        while (!pilaResultados.isEmpty()) { 
+            imprimirLog(pilaResultados.top());
+            pilaResultados.pop();              
+        }
+    }
+}
+
+// validar si el vector ya esta ordenado
+bool estaOrdenado(const vector<LogRecord>& arr) {
+    if (arr.empty()) return true;
+    for (size_t i = 1; i < arr.size(); i++) {
+        if (arr[i] < arr[i - 1]) return false;
+    }
+    return true;
+}
+
+// funcion para generar archivo output ordenado
+void archivoOutput(const vector<LogRecord>& arr) {
+    ofstream salida("output608.out");
+    if (!salida.is_open()) {
+        cout << "Error: No se pudo crear output608.out" << endl;
+        return;
+    }
+    for (const auto& log : arr) {
+        salida << log.mes << " " << log.dia << " " << log.year << " " 
+               << log.hora << " " << log.ip << " " << log.mensaje << "\n";
+    }
+    salida.close();
+    cout << "Archivo 'output608.out' generado exitosamente." << endl;
+}
+
+
+// main menu
 int main() {
-    DoublyLinkedList<LogRecord> listaLogs;
-    vector<LogRecord> arrayTemporalLogs; // Vector de apoyo para Quicksort O(1) en acceso
-    
-    // 1. Cargar el archivo
-    cargarArchivo(listaLogs);
-    
-    // 2. Transferir datos de tu DLinkedList al vector para poder ordenarlos
-    while (!listaLogs.empty()) { 
-        arrayTemporalLogs.push_back(listaLogs.deleteFirst());
-    }
+    vector<LogRecord> arrayTemporalLogs; 
+    bool datosOrdenados = false;
+    string rutaExitosa = "";
+    int opt;
 
-    if (arrayTemporalLogs.empty()) {
-        cout << "No hay registros para procesar." << endl;
-        return 0;
-    }
+    do {
+        cout << "\n--- Analisis de Logs ---\n";
+        cout << "1. Cargar y Ordenar Archivo de Log\n";
+        cout << "2. Buscar registros por fecha (Requiere ordenamiento)\n";
+        cout << "3. Ver Estadisticas Generales\n";
+        cout << "4. Salir\n";
+        cout << "Opcion: ";
+        cin >> opt;
 
-    // 3. Ordenar usando Quicksort
-    quicksort(arrayTemporalLogs, 0, arrayTemporalLogs.size() - 1);
-    cout << "\nRegistros ordenados exitosamente por Año, Mes y Día.\n";
+        if (opt == 1) {
+            int fileOpt;
+            cout << "\nArchivos disponibles:\n1. log607-1.txt\n2. log607-2.txt\nSeleccion: ";
+            cin >> fileOpt;
+            
+            string rutaArchivo = (fileOpt == 1) ? "data/log607-1.txt" : "data/log607-2.txt";
+            cargarArchivo(arrayTemporalLogs, rutaArchivo, rutaExitosa);
+            
+            if (arrayTemporalLogs.empty()) continue;
 
-    // 4. Calcular e imprimir todas las estadísticas pedidas
-    Estadisticas(arrayTemporalLogs);
+            if (estaOrdenado(arrayTemporalLogs)) {
+                cout << "\nLa lista YA ESTA ORDENADA. Se omite el algoritmo de ordenamiento.\n";
+                datosOrdenados = true;
+            } else {
+                cout << "\nOrdenando registros...\n";
+                long long comparaciones = 0;
+                int maxProfundidad = 0;
+                
+                auto start = high_resolution_clock::now();
+                quicksort(arrayTemporalLogs, 0, arrayTemporalLogs.size() - 1, comparaciones, 1, maxProfundidad);
+                auto stop = high_resolution_clock::now();
+                auto duration = duration_cast<milliseconds>(stop - start);
+                
+                datosOrdenados = true;
+                
+                cout << "\n--- Resultados del Algoritmo ---\n";
+                cout << "Algoritmo usado: QuickSort\n";
+                cout << "Archivo origen: " << rutaExitosa << "\n";
+                cout << "Tamanio de los datos: " << arrayTemporalLogs.size() << " elementos\n";
+                cout << "Tiempo de ejecucion: " << duration.count() << " ms\n";
+                cout << "Numero de comparaciones: " << comparaciones << "\n";
+                cout << "Profundidad maxima de recursion: " << maxProfundidad << "\n";
+                cout << "Coincidencia con la prediccion: (Complejidad: O(N log N)\n";
+                cout << "--------------------------------\n";
+            }
+            archivoOutput(arrayTemporalLogs);
+            
+        } else if (opt == 2) {
+            if (arrayTemporalLogs.empty()) {
+                cout << "\nNo hay datos cargados. Ejecute la Opcion 1 primero.\n";
+            } else {
+                buscarPorDia(arrayTemporalLogs, datosOrdenados);
+            }
+        } else if (opt == 3) {
+            Estadisticas(arrayTemporalLogs);
+        }
 
+    } while (opt != 4);
+
+    cout << "Programa finalizado.\n";
     return 0;
 }

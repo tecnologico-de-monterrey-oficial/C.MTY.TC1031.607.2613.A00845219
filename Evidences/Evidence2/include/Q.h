@@ -52,7 +52,7 @@ public:
         if (isEmpty()) {
             frontNode = rear = newNode;
         } else {
-            rear->next = newNode;
+            rear->next.reset(newNode);
             rear = newNode;
         }
         count++;
@@ -65,13 +65,13 @@ public:
         }
         
         Node<T>* aux = frontNode;
-        T valor = aux->dato; // Guardamos el dato antes de borrar el nodo
+        T valor = aux->data; // Guardamos el dato antes de borrar el nodo
         
         if (frontNode == rear) { // Si solo hay un elemento
             frontNode = nullptr;
             rear = nullptr;
         } else {
-            frontNode = frontNode->next;
+            frontNode = frontNode->next.get();
         }
         
         delete aux;
@@ -84,7 +84,7 @@ public:
         if (isEmpty()) {
             throw std::runtime_error("Excepcion: No hay datos en la fila.");
         }
-        return frontNode->dato;
+        return frontNode->data;
     }
 };
 
