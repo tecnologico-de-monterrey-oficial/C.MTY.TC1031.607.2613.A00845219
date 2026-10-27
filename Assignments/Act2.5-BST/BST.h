@@ -2,6 +2,9 @@
 #define BST_H
 
 #include "NodeT.h"
+#include <string>
+#include <algorithm>
+
 
 template <typename T>
 class BST {
@@ -11,6 +14,8 @@ private:
     void preOrder(NodeT<T>* node);
     void inOrder(NodeT<T>* node);
     void postOrder(NodeT<T>* node);
+    int heightTree(NodeT<T>* node); // metodo para checar altura
+
 public:
     BST() : root(nullptr) {}
     void insert(T data);
@@ -18,6 +23,9 @@ public:
     void print();
     void visit(string method);
     void remove(T data);
+    int height();
+    void ancestors(T data);
+    int WhatLevelAmI(T data);
 };
 
 template <typename T>
@@ -315,5 +323,80 @@ void BST<T>::print() {
     printTree(root, "", false, true);
 }
 
+template <typename T>
+int BST<T>::height() {
+    return heightTree(root);
+}
+
+template <typename T>
+int BST<T>::heightTree(NodeT<T>* node) {
+    // Si el nodo es nulo la altura es 0
+    if (node == nullptr) {
+        return 0; 
+    }
+    // calcular alturas de ambos lados con los nodos
+    int leftHeight = heightTree(node->left);
+    int rightHeight = heightTree(node->right);
+    
+    // el mayor de los +1 del nodo actual
+    return max(leftHeight, rightHeight) + 1;
+}
+
+template <typename T>
+void BST<T>::ancestors(T data) {
+    // validar si hay datos en el arbol
+    if (root == nullptr) {
+        cout << "El árbol está vacío." << endl;
+        return;
+    }
+    // validar si el dato existe
+    if (!find(data)) {
+        cout << "El dato no existe en el árbol." << endl;
+        return;
+    }
+
+    NodeT<T>* aux = root;
+    // Mientras no lleguemos al nodo que buscamos
+    while (aux != nullptr && aux->data != data) {
+        cout << aux->data << " ";
+        // si el valor es menor al nodo vamos a la izquierda
+        if (data < aux->data) {
+            aux = aux->left;
+        } 
+        // si no es menor es mayor y vamos a la derecha
+        else {
+            aux = aux->right;
+        }
+    }
+    cout << endl;
+}
+
+template <typename T>
+int BST<T>::WhatLevelAmI(T data) {
+    NodeT<T>* aux = root;
+    // en caso que la raiz cuenta puedes cambiar esto a 0
+    int level = 1;
+
+    while (aux != nullptr) {
+        // si el nodo es el que buscamos termina el loop
+        if (aux->data == data) {
+            return level;
+        }
+        // si el valor es menor al nodo actual vamos izquierda
+        if (data < aux->data) {
+            aux = aux->left;
+        } 
+        // si es mayor entonces es por la derecha
+        else {
+            aux = aux->right;
+        }
+        level++;
+    }
+    
+    // regresar error si no encuentra el dato
+    return -1; 
+}
 
 #endif // BST_H
+// se me olvido poner en el anterior commit que el codigo lo copie completamente porque no encontraba el error
+// y la IA me decia que habia que modificar gran parte del codigo (igual funcionaba pero usando otro metodo)
