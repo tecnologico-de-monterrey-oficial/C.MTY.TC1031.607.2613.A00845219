@@ -1,263 +1,319 @@
-// Clase Huicho
+#if !defined(BST_H)
+#define BST_H
+
 #include "NodeT.h"
-class BST{
-	public:
-		BST();
-		~BST();
-		bool search(int data);
-		void add(int data);
-		void remove(int data);
-		void visit(int tipo);
-		int size();
-/*
-		int height();	// size + max
-		void ancestors(int dato);  // search + pila
-		int whatlevelamI(int dato); // search + contador
-*/
-	private:
-		NodeT *root;	
-		void preOrden(NodeT *r);
-		void inOrden(NodeT *r);
-		void postOrden(NodeT *r);
-		void levelxlevel();
-		void destruye(NodeT *r);
-		int howManyChildren(NodeT *r);
-		int pred(NodeT *r);
-		int succ(NodeT *r);
-		int sizeHelper(NodeT *r);
+
+template <typename T>
+class BST {
+private:
+    NodeT<T>* root;
+    void printTree(NodeT<T>* node, string prefix, bool isRight, bool isRoot);
+    void preOrder(NodeT<T>* node);
+    void inOrder(NodeT<T>* node);
+    void postOrder(NodeT<T>* node);
+public:
+    BST() : root(nullptr) {}
+    void insert(T data);
+    bool find(T data);
+    void print();
+    void visit(string method);
+    void remove(T data);
 };
 
-BST::BST(){
-	root = nullptr;
+template <typename T>
+void BST<T>::insert(T data) {
+    // Validamos si el árbol está vacío
+    if (root == nullptr) {
+        // el árbol está vacío
+        // apuntamos root al nuevo nodo
+        root = new NodeT<T>(data);
+    } else {
+        // el árbol no está vacío
+        // creamos un apuntador aux igual a root
+        NodeT<T>* aux = root;
+        // creamos un apuntador father igual a root
+        NodeT<T>* father = root;
+        // itero en el árbol hasta encontrar donde voy a insertar el nodo
+        while (aux != nullptr) {
+            // valido si aux->data es igual a data
+            if (aux->data == data) {
+                // son iguales
+                return;
+            } else {
+                // hacemos father igual a aux
+                father = aux;
+                // recorremos aux
+                //if (data < aux->data ? aux = aux->left : aux = aux->right);  
+                if (data < aux->data) {
+                    aux = aux->left;
+                } else {
+                    aux = aux->right;
+                }
+            }
+        }
+        // inserto el nodo en el lado correspondiente
+        if (data < father->data) {
+            // el nodo va al lado izquierdo de father
+            father->left = new NodeT<T>(data);
+        } else {
+            // el nodo va al lado derecho de father
+            father->right = new NodeT<T>(data);
+        }
+    }
 }
 
-BST::~BST(){
-	destruye(root);
+template <typename T>
+bool BST<T>::find(T data) {
+    // validamos que el árbol no este vacío
+    if (root == nullptr) {
+        // el árbol está vacío
+        // retornamos false
+        return false;
+    } else {
+        // el árbol no está vacío
+        // creamos un apuntador aux igual a root
+        NodeT<T>* aux = root;
+        // itero en el árbol hasta encontrar el nodo a buscar o que no lo encuentre
+        while (aux != nullptr) {
+            // valido si aux->data es igual a data
+            if (aux->data == data) {
+                // son iguales, regreso true
+                return true;
+            } else {
+                // recorremos aux
+                // (data < aux->data) ? aux = aux->left : aux = aux->right;  
+                if (data < aux->data) {
+                    aux = aux->left;
+                } else {
+                    aux = aux->right;
+                }
+            }
+        }
+        // no se encontró el dato a buscar, regreso false
+        return false;
+    }
 }
 
-//Complejidad: O(n)
-void BST::destruye(NodeT *r){
-	if (r != nullptr){
-		destruye(r->getLeft());
-		destruye(r->getRight());
-		delete r;
-	}
+template <typename T>
+void BST<T>::remove(T data) {
+    // validamos si el árbol esta vacío
+    if (root != nullptr) {
+        // validamos si el nodo a borrar es root
+        if (root->data == data) {
+            // validamos si no tiene hijos
+            if (root->left == nullptr && root->right == nullptr) {
+                // root no tienes hijos
+                // creamos un nodo aux igual a root
+                NodeT<T>* aux = root;
+                // asignamos nulos a root
+                root = nullptr;
+                // removemos aux
+                delete aux;
+                // nos salimos de la función
+                return;
+            }
+            // validamos si tiene un hijo
+            if (root->left == nullptr || root->right == nullptr) {
+                // root solo tiene un hijo
+                // creamos una puntador auxiliar igual a root
+                NodeT<T>* aux = root;
+                // movemos root al hijo
+                root = (root->left == nullptr) ? root->right : root->left;
+                // removemos aux
+                delete aux;
+                // nos salimos de la función
+                return;
+            }
+            // root tiene dos hijos
+            // creamos un apuntador aux igual a root
+            NodeT<T>* aux = root;
+            // validamos que el apuntador right de aux->left sea nulos
+            if (aux->left->right == nullptr) {
+                // aux->left es el más grande del lado izquierdo
+                // creamos un apuntador que apunte a aux->left
+                NodeT<T>* auxRemove = aux->left;
+                // actulizamo el valor de aux por el valor de auxRemove
+                aux->data = auxRemove->data;
+                // asignamos a aux->left, auxRemove->left
+                aux->left = auxRemove->left;
+                // removemos auxRemove
+                delete auxRemove;
+                // nos salimos de la función
+                return;
+            } else {
+                // el más grande del lado izquierdo no es aux->left
+                // creamos un apuntador que va a ser el padre del que voy a remover igual a aux->left
+                NodeT<T>* fatherRemove = aux->left;
+                // creamos un apuntador hacia el hijo derecho de fatherRemove
+                NodeT<T>* auxRemove = fatherRemove->right;
+                // iteramos hastra encontrar el mas grande
+                while (auxRemove->right != nullptr) {
+                    // recorremos los apuntadores hacia la derecha
+                    fatherRemove = auxRemove;
+                    auxRemove = auxRemove->right;
+                }
+                // ya encontramos al más grande del lado izquierdo
+                // igualamos aux->data igual a auxRemove->data
+                aux->data = auxRemove->data;
+                // actualizamos con nules el lado derecho de fatherRemove
+                fatherRemove->right = nullptr;
+                // removemos auxRemove
+                delete auxRemove;
+                // nos salimos de la función
+                return;
+            }
+        } else {
+            // no quiero borrar raíz
+            // busco el nodo a borrar
+            // creamos un apuntador father igual a root
+            NodeT<T>* father = root;
+            // creamos un aputador aux igual al hijo corrspondiente
+            NodeT<T>* aux = (data < root->data) ? root->left : root->right;
+            // itero en el árbol hasta encontrar el nodo a buscar o que no lo encuentre
+            while (aux != nullptr) {
+                // valido si aux->data es igual a data
+                if (aux->data == data) {
+                    // son iguales, regreso true
+                    // lo removemos
+                    // validamos si no tiene hijos
+                    if (aux->left == nullptr && aux->right == nullptr) {
+                        // aux no tienes hijos
+                        // asignamos nulos al hijo correspondiente de father
+                        (data < father->data) ? father->left = nullptr : father->right = nullptr;
+                        // removemos aux
+                        delete aux;
+                        // nos salimos de la función
+                        return;
+                    }
+                    // validamos si tiene un hijo
+                    if (aux->left == nullptr || root->right == nullptr) {
+                        // aux solo tiene un hijo
+                        if (data < father->data) {
+                            // el hijo esta a la izquierda del padre
+                            father->left = (aux->left != nullptr) ? aux->left : aux->right;
+                        } else {
+                            // el hijo esta a la derecha del padre
+                            father->right = (aux->left != nullptr) ? aux->left : aux->right;
+                        }
+                        // removemos aux
+                        delete aux;
+                        // nos salimos de la función
+                        return;
+                    }
+                    // aux tiene dos hijos
+                    // validamos que el apuntador right de aux->left sea nulos
+                    if (aux->left->right == nullptr) {
+                        // aux->left es el más grande del lado izquierdo
+                        // creamos un apuntador que apunte a aux->left
+                        NodeT<T>* auxRemove = aux->left;
+                        // actulizamo el valor de aux por el valor de auxRemove
+                        aux->data = auxRemove->data;
+                        // asignamos a aux->left, auxRemove->left
+                        aux->left = auxRemove->left;
+                        // removemos auxRemove
+                        delete auxRemove;
+                        // nos salimos de la función
+                        return;
+                    } else {
+                        // el más grande del lado izquierdo no es aux->left
+                        // creamos un apuntador que va a ser el padre del que voy a remover igual a aux->left
+                        NodeT<T>* fatherRemove = aux->left;
+                        // creamos un apuntador hacia el hijo derecho de fatherRemove
+                        NodeT<T>* auxRemove = fatherRemove->right;
+                        // iteramos hastra encontrar el mas grande
+                        while (auxRemove->right != nullptr) {
+                            // recorremos los apuntadores hacia la derecha
+                            fatherRemove = auxRemove;
+                            auxRemove = auxRemove->right;
+                        }
+                        // ya encontramos al más grande del lado izquierdo
+                        // igualamos aux->data igual a auxRemove->data
+                        aux->data = auxRemove->data;
+                        // actualizamos con nules el lado derecho de fatherRemove
+                        fatherRemove->right = nullptr;
+                        // removemos auxRemove
+                        delete auxRemove;
+                        // nos salimos de la función
+                        return;
+                    }
+                } else {
+                    // recorremos aux y father
+                    father = aux;
+                    aux = (data < aux->data) ? aux->left : aux->right;  
+                }
+            }
+            // no se encontró el dato a buscar, arrojamos una excepción
+            throw out_of_range("El nodo a borrar no existe");
+        }
+    }
 }
 
-// Complejidad: O(altura)
-int BST::pred(NodeT *r){
-	NodeT *curr = r->getLeft();
-	while (curr->getRight() != nullptr){
-		curr = curr->getRight();
-	}
-	return curr->getData();
+template <typename T>
+void BST<T>::printTree(NodeT<T>* node, string prefix, bool isRight, bool isRoot) {
+    if (node == nullptr) return;
+    printTree(node->right, prefix + (isRoot ? "" : (isRight ? "      " : "|     ")), true, false);
+    cout << prefix << (isRoot ? "" : (isRight ? ".---- " : "`---- ")) << node->data << endl;
+    printTree(node->left,  prefix + (isRoot ? "" : (isRight ? "|     " : "      ")), false, false);
 }
 
-int BST::succ(NodeT *r){
-	NodeT *curr = r->getRight();
-	while (curr->getLeft() != nullptr){
-		curr = curr->getLeft();
-	}
-	return curr->getData();
+template <typename T>
+void BST<T>::preOrder(NodeT<T>* node) {
+    if (node != nullptr) {
+        // imprimimos data
+        cout << node->data << " ";
+        // hacemos preOrder con left
+        preOrder(node->left);
+        // hacemos preOrder con right
+        preOrder(node->right);
+    }
 }
 
-// Complejidad: O(1)
-int BST::howManyChildren(NodeT *r){
-	int cont = 0;
-	if (r->getLeft() != nullptr){
-		cont++;
-	}
-	if (r->getRight() != nullptr){
-		cont++;
-	}
-	return cont;
+template <typename T>
+void BST<T>::inOrder(NodeT<T>* node) {
+    if (node != nullptr) {
+        // hacemos inOrder con left
+        inOrder(node->left);
+        // imprimimos data
+        cout << node->data << " ";
+        // hacemos inOrder con right
+        inOrder(node->right);
+    }
 }
 
-// Complejidad: O(altura del árbol)
-bool BST::search(int data){
-	NodeT *curr = root;
-	while (curr != nullptr){
-		if (curr->getData() == data){
-			return true;
-		}
-/*
-		if (curr->getData() > data){
-			curr = curr->getLeft();
-		}
-		else{
-			curr = curr->getRight();
-		}
-*/
-		curr = (curr->getData() > data) ? curr->getLeft() : curr->getRight();
-	}
-	return false;
+template <typename T>
+void BST<T>::postOrder(NodeT<T>* node) {
+    if (node != nullptr) {
+        // hacemos inOrder con left
+        postOrder(node->left);
+        // hacemos inOrder con right
+        postOrder(node->right);
+        // imprimimos data
+        cout << node->data << " ";
+    }
 }
 
-// Complejidad: O(altura del árbol)
-void BST::add(int data){
-	NodeT *curr = root;
-	NodeT *father = nullptr;
-	while (curr != nullptr){
-		if (curr->getData() == data){
-			return;
-		}
-		father = curr;
-		curr = (curr->getData() > data) ? curr->getLeft() : curr->getRight();
-	}
-	if (father == nullptr){
-		root = new NodeT(data);
-	}
-	else{
-/*
-		if (father->getData() > data){
-			father->setLeft(new NodeT(data));
-		}
-		else{
-			father->setRight(new NodeT(data));
-		}
-*/
-		(father->getData() > data) ? father->setLeft(new NodeT(data)) :
-									 father->setRight(new NodeT(data));
-	}
-
+template <typename T>
+void BST<T>::visit(string method) {
+    if (method == "preOrder") {
+        preOrder(root);
+    }
+    if (method == "inOrder") {
+        inOrder(root);
+    }
+    if (method == "postOrder") {
+        postOrder(root);
+    }
+    cout << endl;
 }
 
-void BST::remove(int data){
-	NodeT *curr = root;
-	NodeT *father = nullptr;
-	while (curr != nullptr && curr->getData() != data){
-		father = curr;
-		curr = (curr->getData() > data) ? curr->getLeft() : curr->getRight();
-	}
-	if (curr == nullptr){
-		return;
-	}
-	int cantHijos = howManyChildren(curr);
-	switch (cantHijos){
-		case 0: if (father == nullptr){
-					root = nullptr;
-				}
-				else{
-					if (father->getData() > data){
-						father->setLeft(nullptr);
-					}
-					else{
-						father->setRight(nullptr);
-					}
-				}
-				delete curr;
-				break;
-		case 1: if (father == nullptr){   // El que quiero borrar es raíz y tiene 1 hijo
-					if (curr->getLeft() != nullptr){
-						root = curr->getLeft();
-					}
-					else{
-						root = curr->getRight();
-					}
-				}
-				else{
-					if (father->getData() > data){
-						// El que quiero borrar esta a la izq del padre
-						if (curr->getLeft() != nullptr){
-							// El único hijo esta a la izq del que quiero borrar
-							father->setLeft(curr->getLeft());
-						}
-						else{
-							// El único hijo esta a la der del que quiero borrar
-							father->setLeft(curr->getRight());
-						}
-					}
-					else{
-						// El que quiero borrar esta a la der del padre
-						if (curr->getLeft() != nullptr){
-							// El único hijo esta a la izq del que quiero borrar
-							father->setRight(curr->getLeft());
-						}
-						else{
-							// El único hijo esta a la der del que quiero borrar
-							father->setRight(curr->getRight());
-						}
-					}
-				}
-				delete curr;
-				break;
-		case 2: int sucesor = succ(curr);
-				remove(sucesor);
-				curr->setData(sucesor);
-				break;
-	}
-
+template <typename T>
+void BST<T>::print() {
+    if (root == nullptr) { 
+        cout << "(arbol vacio)" << endl; 
+        return; 
+    }
+    printTree(root, "", false, true);
 }
 
-//Complejidad: O(n)
-void BST::preOrden(NodeT *r){
-	if (r != nullptr){
-		cout << r->getData() << " ";
-		preOrden(r->getLeft());
-		preOrden(r->getRight());
-	}
-}
 
-//Complejidad: O(n)
-void BST::inOrden(NodeT *r){
-	if (r != nullptr){
-		inOrden(r->getLeft());
-		cout << r->getData() << " ";
-		inOrden(r->getRight());
-	}
-}
-
-//Complejidad: O(n)
-void BST::postOrden(NodeT *r){
-	if (r != nullptr){
-		postOrden(r->getLeft());
-		postOrden(r->getRight());		
-		cout << r->getData() << " ";
-	}
-}
-
-//Complejidad: O(n)
-void BST::levelxlevel(){
-	queue<NodeT*> q;
-	if (root != nullptr){
-		q.push(root);
-		while (!q.empty()){
-			cout << q.front()->getData()<< " ";
-			if (q.front()->getLeft() != nullptr){
-				q.push(q.front()->getLeft());
-			}
-			if (q.front()->getRight() != nullptr){
-				q.push(q.front()->getRight());
-			}	
-			q.pop();	
-		}
-	}
-}
-
-//Complejidad: O(n)
-void BST::visit(int tipo){  // vist
-	switch (tipo){
-		case 1 : preOrden(root);
-				 break;
-		case 2 : inOrden(root);
-				 break;
-		case 3 : postOrden(root);
-				 break;
-		case 4 : levelxlevel();
-				 break;
-	}
-	cout << endl;
-}
-
-// Complejidad: O(n)
-int BST::sizeHelper(NodeT *r){
-	if (r == nullptr){
-		return 0;
-	}
-	return 1 + sizeHelper(r->getLeft()) + sizeHelper(r->getRight());
-}
-
-//Complejidad: O(n)
-int BST::size(){
-	return sizeHelper(root);
-}
+#endif // BST_H
